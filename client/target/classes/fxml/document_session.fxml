@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<SplitPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.example.client.Controllers.DocumentSessionController"
+           orientation="HORIZONTAL"
+           prefWidth="800" prefHeight="500">
+
+    <!-- Left Pane -->
+    <items>
+        <VBox spacing="15" prefWidth="250" padding="10">
+            <VBox spacing="5">
+                <Label text="Editor Code:" />
+                <TextField fx:id="editorCodeField" editable="false" />
+
+                <Label text="Viewer Code:" />
+                <TextField fx:id="viewerCodeField" editable="false" />
+            </VBox>
+
+            <Label text="Collaborators:" />
+            <ListView fx:id="collaboratorsList" />
+        </VBox>
+
+        <!-- Right Pane -->
+        <AnchorPane>
+            <TextArea fx:id="editorTextArea" prefWidth="550" wrapText="true" />
+        </AnchorPane>
+    </items>
+</SplitPane>

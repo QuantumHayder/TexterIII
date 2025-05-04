@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.client.Controllers.DocumentSelectionController"
+            prefWidth="400" prefHeight="300" style="-fx-padding: 20;">
+    <children>
+        <VBox spacing="15" alignment="CENTER">
+            <Label text="Document Selection" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Button text="Create New Document" onAction="#handleCreateNewDocument" />
+            <Label text="OR" />
+            <TextField fx:id="joinCodeField" promptText="Enter document code to join" />
+            <Button text="Join Document" onAction="#handleJoinDocument" />
+        </VBox>
+    </children>
+</AnchorPane>

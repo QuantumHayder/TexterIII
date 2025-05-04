@@ -1,0 +1,11 @@
+com\example\client\Controllers\LoginController.class
+com\example\client\Utils\Exceptions\GlobalExceptionHandler.class
+com\example\client\Models\ClientModel$UserMode.class
+com\example\client\Controllers\MyStompSessionHandler.class
+com\example\client\Controllers\SecondaryController.class
+com\example\client\ClientApplication.class
+com\example\client\Models\DocumentModel.class
+com\example\client\Controllers\DocumentSelectionController.class
+com\example\client\Models\Node.class
+com\example\client\Controllers\DocumentSessionController.class
+com\example\client\Models\ClientModel.class
