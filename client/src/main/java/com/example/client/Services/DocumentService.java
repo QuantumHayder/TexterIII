@@ -1,9 +1,16 @@
 package com.example.client.Services;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.UUID;
 
 import com.example.client.DTO.DocumentRequestDTO;
 import com.example.client.DTO.DocumentResponseDTO;
@@ -51,4 +58,62 @@ public class DocumentService {
 
         return objectMapper.readValue(response.body(), DocumentResponseDTO.class);
     }
+
+    
+    
+    // SH added for client document download
+    public String downloadDocument(UUID docId) throws IOException {
+    String url = "http://localhost:8080/api/document/download/" + docId;
+    HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+    connection.setRequestMethod("GET");
+
+    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+    StringBuilder response = new StringBuilder();
+    String line;
+    while ((line = in.readLine()) != null) {
+        response.append(line).append("\n");
+    }
+    in.close();
+
+    return response.toString().trim();
+     }
+   
+     // SH added for client document upload
+
+     public String uploadDocument(UUID documentId, String textContent) throws IOException {
+    String url = "http://localhost:8080/upload"; // adjust host/port if needed
+
+    // Prepare the JSON request
+    String json = String.format(
+        "{\"documentId\":\"%s\", \"textContent\": \"%s\"}",
+        documentId.toString(),
+        textContent.replace("\"", "\\\"")  // Escape double quotes in content
+    );
+
+    HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+    conn.setRequestMethod("POST");
+    conn.setRequestProperty("Content-Type", "application/json");
+    conn.setDoOutput(true);
+
+    try (OutputStream os = conn.getOutputStream()) {
+        byte[] input = json.getBytes("utf-8");
+        os.write(input, 0, input.length);
+    }
+
+    // Read the response
+    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+    StringBuilder response = new StringBuilder();
+    String responseLine;
+    while ((responseLine = br.readLine()) != null) {
+        response.append(responseLine.trim());
+    }
+
+    return response.toString(); // Should be "Document updated successfully." etc.
+}
+
+
+
+
+
+
 }

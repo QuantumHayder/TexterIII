@@ -26,7 +26,26 @@
 
         <!-- Right Pane -->
         <AnchorPane>
-            <TextArea fx:id="editorTextArea" prefWidth="550" wrapText="true" />
+          <!-- SH this part is edited to add download button-->
+            <!--<TextArea fx:id="editorTextArea" prefWidth="550" wrapText="true" />-->
+            <AnchorPane>
+              
+              <children>
+                    <TextArea fx:id="editorTextArea" prefWidth="550" wrapText="true" 
+                         AnchorTop="0.0" AnchorLeft="0.0" AnchorRight="0.0" AnchorBottom="40.0"/>
+        
+                    <Button fx:id="downloadButton" text="Download"
+                         onAction="#onDownloadClicked"
+                             layoutX="10" layoutY="460" />
+
+                    <Button fx:id="uploadButton" text="Upload"
+                        onAction="#onUploadClicked"
+                        layoutX="100" layoutY="460" />
+                 </children>  
+                 
+
+            </AnchorPane>
+
         </AnchorPane>
     </items>
 </SplitPane>
