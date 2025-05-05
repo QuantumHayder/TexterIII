@@ -74,4 +74,10 @@ public class TexterRestController {
     }
     }
 
+    @PostMapping("/upload")
+    public String uploadDocument(@RequestBody DocumentRequestDTO request) {
+        return documentService.uploadDocument(request.getDocumentId(), request.getTextContent());
+    }
+
+
 }

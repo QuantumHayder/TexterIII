@@ -41,7 +41,7 @@ public class DocumentSessionController {
     private int ownerId;
     private String rootNodeId;
     private String docText;
-
+    private final DocumentService documentService = new DocumentService(); // (SH added) msh 3aref eh lazmetha
     public void initializeData(UUID userId, String viewCode, String editCode, List<Pair<String, UserMode>> collaborators,
                                int ownerId, String rootNodeId, String docText) {
         this.userId = userId;
@@ -69,6 +69,8 @@ public class DocumentSessionController {
         editorTextArea.setText(text);
     }    
     // Future: handle WebSocket connection, real-time updates, undo/redo, etc.
+    
+    // Functions for download
     @FXML
     private void handleDownload() {
         FileChooser fileChooser = new FileChooser();
@@ -93,5 +95,36 @@ private void showAlert(String message) {
     alert.setContentText(message);
     alert.showAndWait();
 }
+
+@FXML
+private void onDownloadClicked() {
+    handleDownload(); 
+}
+
+// Functions for upload
+@FXML
+public void handleUploadDocument() {
+    try {
+        String text = editorTextArea.getText();
+        String response = documentService.uploadDocument(currentDocumentId, text);
+        showAlert("Upload Success", response);
+    } catch (Exception e) {
+        showAlert("Upload Failed", e.getMessage());
+    }
+}
+
+private void showAlert(String title, String message) {
+    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    alert.setTitle(title);
+    alert.setHeaderText(null);
+    alert.setContentText(message);
+    alert.showAndWait();
+}
+
+@FXML
+private void onUploadClicked() {
+    handleUploadDocument(); 
+}
+
 
 }
