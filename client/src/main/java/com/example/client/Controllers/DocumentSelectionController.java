@@ -5,10 +5,11 @@ import com.example.client.DTO.DocumentResponseDTO;
 import com.example.client.DTO.DocumentSessionDTO;
 import com.example.client.Models.ClientModel.UserMode;
 import com.example.client.Services.DocumentService;
+import com.example.client.Utils.Helper;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -16,12 +17,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.util.Pair;
 
 public class DocumentSelectionController {
     private int userId;
     private String username;
     private String usermode;
+    private final Helper helper = new Helper();
+
 
     private final DocumentService documentService = new DocumentService();
 
@@ -49,7 +51,7 @@ public class DocumentSelectionController {
         } catch (Exception e) {
             System.err.println("Exception occurred in handleCreateNewDocument()");
             e.printStackTrace();  
-            showErrorDialog("Document Creation Failed", e.getClass().getSimpleName() + ": " + e.getMessage());
+            helper.showErrorDialog("Document Creation Failed", e.getClass().getSimpleName() + ": " + e.getMessage());
 
         }
     }
@@ -58,7 +60,7 @@ public class DocumentSelectionController {
     private void handleJoinDocument() {
         String docCode = joinCodeField.getText().trim();
         if (docCode.isEmpty()) {
-            showAlert("Join Error", "Empty Field", "Document code cannot be empty.");
+            helper.showAlert("Join Error", "Empty Field", "Document code cannot be empty.");
             return;
         }
 
@@ -67,7 +69,7 @@ public class DocumentSelectionController {
             navigateToJoinedDocument(session.getDocumentId(), session.getViewCode(), session.getEditCode(),
                     session.getCollaborators(), session.getOwnerId(), session.getRootNodeId(), session.getTextContent());
         } catch (Exception e) {
-            showAlert("Error", "Join Failed", e.getMessage());
+            helper.showAlert("Error", "Join Failed", e.getMessage());
         }
     }
 
@@ -86,20 +88,5 @@ public class DocumentSelectionController {
         stage.show();
     }
 
-    private void showAlert(String title, String header, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
-
-    private void showErrorDialog(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
     
 }

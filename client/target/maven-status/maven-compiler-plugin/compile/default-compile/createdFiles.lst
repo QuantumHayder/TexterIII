@@ -5,12 +5,15 @@ com\example\client\Controllers\MyStompSessionHandler.class
 com\example\client\Services\DocumentService.class
 com\example\client\Controllers\SecondaryController.class
 com\example\client\DTO\DocumentSessionDTO.class
+com\example\client\Utils\Helper.class
+com\example\client\Controllers\DocumentSessionController$1.class
 com\example\client\ClientApplication.class
 com\example\client\DTO\DocumentResponseDTO.class
 com\example\client\DTO\DocumentRequestDTO.class
 com\example\client\DTO\CollaboratorDTO.class
 com\example\client\Models\DocumentModel.class
 com\example\client\Controllers\DocumentSelectionController.class
+com\example\client\Controllers\DocumentSessionController$MyStompSessionHandler.class
 com\example\client\Models\Node.class
 com\example\client\Controllers\DocumentSessionController.class
 com\example\client\Models\ClientModel.class
