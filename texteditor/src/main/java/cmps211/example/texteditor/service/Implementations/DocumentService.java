@@ -202,6 +202,9 @@ public class DocumentService implements IDocumentService {
         return crdtAlgo.getDocumentText(doc.getRoot());
     }
 
+    // SH added for client side document download
+    
+
     /////////////////Test/////////////////////
     /// 
     /* 

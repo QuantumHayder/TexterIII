@@ -1,8 +1,11 @@
 package cmps211.example.texteditor.controllers;
 
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,7 +16,8 @@ import cmps211.example.texteditor.DTO.DocumentRequestDTO;
 import cmps211.example.texteditor.DTO.DocumentResponseDTO;
 import cmps211.example.texteditor.service.Implementations.ClientService;
 import cmps211.example.texteditor.service.Implementations.DocumentService;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import java.util.UUID;
 
 @RestController   //HTTP
 public class TexterRestController {
@@ -57,6 +61,17 @@ public class TexterRestController {
     public DocumentDTO downloadDocument(@PathVariable UUID documentId){
         return documentService.downloadDocument(documentId);
     }*/
-
+    
+    // SH added + please check that there are no missing endpoints
+    // functions not  implemented needs to be implemented
+    @GetMapping("/api/document/download/{documentId}")
+    public ResponseEntity<String> downloadDocument(@PathVariable UUID documentId) {
+    try {
+        String content = documentService.downloadDocument(documentId).getTextContent();
+        return ResponseEntity.ok(content);
+    } catch (RuntimeException e) {
+        return ResponseEntity.notFound().build();
+    }
+    }
 
 }
