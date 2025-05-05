@@ -17,12 +17,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class DocumentResponseDTO {
     private UUID documentId;
-    private String textContent;
-    private String editCode;
     private String viewCode;
-    private List<Pair<String, UserMode>> collaborators = new ArrayList<>();
-
-    public void addCollaborators (String username, UserMode usermode) {
-        collaborators.add(Pair.of(username,usermode));
+    private String editCode;
+    private List<CollaboratorDTO> collaborators = new ArrayList<>();
+    private String rootNodeId;
+    private String textContent;
+    public void addCollaborators (CollaboratorDTO member) {
+        collaborators.add(member);
     }
 }

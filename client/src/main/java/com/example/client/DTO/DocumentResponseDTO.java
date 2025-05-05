@@ -1,5 +1,6 @@
 package com.example.client.DTO;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,11 +18,15 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DocumentResponseDTO {
-    private UUID docUID;
+    private UUID documentId;
     private String viewCode;
     private String editCode;
-    List<Pair<String, UserMode>> collaborators;
+    private List<CollaboratorDTO> collaborators = new ArrayList<>();
     private int ownerId;
     private String rootNodeId;
-    private String docText;
+    private String textContent;
+
+    public void addCollaborators (CollaboratorDTO member) {
+        collaborators.add(member);
+    }
 }

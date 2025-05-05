@@ -6,11 +6,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
 @Setter
-@AllArgsConstructor
+@Getter
 @NoArgsConstructor
-public class ClientRequest {
+@AllArgsConstructor
+public class CollaboratorDTO {
     private String username;
-    private UserMode usermode;
+    private UserMode mode;
 }

@@ -1,5 +1,6 @@
 package com.example.client.Controllers;
 
+import com.example.client.DTO.CollaboratorDTO;
 import com.example.client.DTO.DocumentResponseDTO;
 import com.example.client.DTO.DocumentSessionDTO;
 import com.example.client.Models.ClientModel.UserMode;
@@ -37,10 +38,19 @@ public class DocumentSelectionController {
     private void handleCreateNewDocument() {
         try {
             DocumentResponseDTO session = documentService.createDocument(userId);
-            navigateToJoinedDocument(session.getDocUID(), session.getViewCode(), session.getEditCode(),
-                    session.getCollaborators(), session.getOwnerId(), session.getRootNodeId(), session.getDocText());
+
+            System.out.println("Received DTO in controller:");
+            System.out.println("  docId: " + session.getDocumentId());
+            System.out.println("  collaborators: " + session.getCollaborators());
+            System.out.println("  rootNodeId: " + session.getRootNodeId());
+
+            navigateToJoinedDocument(session.getDocumentId(), session.getViewCode(), session.getEditCode(),
+                    session.getCollaborators(), userId, session.getRootNodeId(), session.getTextContent());
         } catch (Exception e) {
-            showAlert("Error", "Document Creation Failed", e.getMessage());
+            System.err.println("Exception occurred in handleCreateNewDocument()");
+            e.printStackTrace();  
+            showErrorDialog("Document Creation Failed", e.getClass().getSimpleName() + ": " + e.getMessage());
+
         }
     }
 
@@ -54,15 +64,15 @@ public class DocumentSelectionController {
 
         try {
             DocumentResponseDTO session = documentService.registerToDocument(docCode, userId);
-            navigateToJoinedDocument(session.getDocUID(), session.getViewCode(), session.getEditCode(),
-                    session.getCollaborators(), session.getOwnerId(), session.getRootNodeId(), session.getDocText());
+            navigateToJoinedDocument(session.getDocumentId(), session.getViewCode(), session.getEditCode(),
+                    session.getCollaborators(), session.getOwnerId(), session.getRootNodeId(), session.getTextContent());
         } catch (Exception e) {
             showAlert("Error", "Join Failed", e.getMessage());
         }
     }
 
     private void navigateToJoinedDocument(UUID documentId, String editorCode, String viewerCode,
-                                          List<Pair<String, UserMode>> collaborators, int ownerId, String rootNodeId, String content) throws IOException {
+                                          List<CollaboratorDTO> collaborators, int ownerId, String rootNodeId, String content) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/document_session.fxml"));
         Scene scene = new Scene(loader.load());
 
@@ -83,4 +93,13 @@ public class DocumentSelectionController {
         alert.setContentText(content);
         alert.showAndWait();
     }
+
+    private void showErrorDialog(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    
 }

@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.data.util.Pair;
 
+import com.example.client.DTO.CollaboratorDTO;
 import com.example.client.Models.ClientModel.UserMode;
 
 import javafx.fxml.FXML;
@@ -16,17 +17,17 @@ public class DocumentSessionController {
     @FXML private TextArea editorTextArea;
     @FXML private TextField editorCodeField;
     @FXML private TextField viewerCodeField;
-    @FXML private ListView<Pair<String,UserMode>> collaboratorsList;
+    @FXML private ListView<CollaboratorDTO> collaboratorsList;
 
     private UUID userId;
     private String viewCode;
     private String editCode;
-    private List<Pair<String, UserMode>> collaborators;
+    private List<CollaboratorDTO> collaborators;
     private int ownerId;
     private String rootNodeId;
     private String docText;
 
-    public void initializeData(UUID userId, String viewCode, String editCode, List<Pair<String, UserMode>> collaborators,
+    public void initializeData(UUID userId, String viewCode, String editCode, List<CollaboratorDTO> collaborators,
                                int ownerId, String rootNodeId, String docText) {
         this.userId = userId;
         this.viewCode = viewCode;

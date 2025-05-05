@@ -10,6 +10,10 @@ import org.springframework.data.util.Pair;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import cmps211.example.texteditor.DTO.CollaboratorDTO;
 import cmps211.example.texteditor.DTO.DocumentResponseDTO;
 import cmps211.example.texteditor.crdt.CRDTAlgorithm;
 import cmps211.example.texteditor.crdt.Node;
@@ -48,30 +52,52 @@ public class DocumentService implements IDocumentService {
         }
     
         ClientModel client = clientOpt.get();
-
+        
         DocumentModel newDoc = new DocumentModel(ownerId);
-        Node rootNode = new Node(ownerId, '\0', null); // '\0' = null char
-        rootNode.markDeleted();
 
-        newDoc.setNodes(new ArrayList<>());
-        newDoc.setClients(new ArrayList<>());
+        Node rootNode = new Node(ownerId, '\0', null);
+        rootNode.markDeleted();
+        rootNode.setDocument(newDoc); // set back-reference
         newDoc.setRoot(rootNode);
-        newDoc.addNode(rootNode); 
+        newDoc.addNode(rootNode); // adds to node list
+
+        // Set up client
+        client.setDocument(newDoc);
         newDoc.addClient(client);
 
-        client.setDocument(newDoc);
-
-        newDoc.setEditCode("Edit-" + newDoc.getUID());
-        newDoc.setViewCode("View" + newDoc.getUID());
-    
+        // Save Document FIRST to get UID and cascade persist root node + client
         DocumentModel savedDoc = docRepo.save(newDoc);
-       // DTO response
+
+        // Now set codes based on generated UID
+        savedDoc.setEditCode("Edit-" + savedDoc.getUID());
+        savedDoc.setViewCode("View-" + savedDoc.getUID());
+        savedDoc = docRepo.save(savedDoc); // persist edit/view codes
+
+        // Return response
         DocumentResponseDTO response = new DocumentResponseDTO();
         response.setDocumentId(savedDoc.getUID());
         response.setEditCode(savedDoc.getEditCode());
         response.setViewCode(savedDoc.getViewCode());
-        response.setTextContent(""); // default empty text
-        response.addCollaborators(client.getUsername(), client.getMode());
+        response.setRootNodeId(savedDoc.getRoot().getUID());
+        response.setTextContent("");
+        
+        String username = client.getUsername();
+        UserMode mode = client.getMode();
+
+        if (username == null || mode == null) {
+            throw new IllegalArgumentException("Username or mode must not be null");
+        }
+
+        List<CollaboratorDTO> collaborators = new ArrayList<>();
+        CollaboratorDTO member = new CollaboratorDTO(client.getUsername(), client.getMode());
+        collaborators.add(member);
+        response.setCollaborators(collaborators);
+
+        try {
+            System.out.println(new ObjectMapper().writeValueAsString(response));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+}
 
         return response;
     }
@@ -88,13 +114,20 @@ public class DocumentService implements IDocumentService {
         DocumentModel doc = docOpt.get();
         ClientModel client = clientOpt.get();
 
+        String username = client.getUsername();
+        UserMode mode = client.getMode();
+
+        if (username == null || mode == null) {
+            throw new IllegalArgumentException("Username or mode must not be null");
+        }
+
         client.setDocument(doc);  
         doc.addClient(client);
         docRepo.save(doc);
 
         // Notify other users
-        List<Pair<String, UserMode>> collaborators = doc.getClients().stream()
-        .map(c -> Pair.of(c.getUsername(), c.getMode()))
+        List<CollaboratorDTO> collaborators = doc.getClients().stream()
+        .map(c -> new CollaboratorDTO(c.getUsername(), c.getMode()))
         .toList();
 
         messagingTemplate.convertAndSend(
@@ -102,13 +135,14 @@ public class DocumentService implements IDocumentService {
             collaborators
         );
 
-        return new DocumentResponseDTO(
-            doc.getUID(),
-        buildDocumentText(doc),
-        doc.getEditCode(),
-        doc.getViewCode(),
-        collaborators
-        );
+        DocumentResponseDTO response = new DocumentResponseDTO();
+        response.setDocumentId(doc.getUID());
+        response.setEditCode(doc.getEditCode());
+        response.setViewCode(doc.getViewCode());
+        response.setCollaborators(collaborators);
+        response.setTextContent("");   //need to add the crdt method of traversing the tree
+        response.setRootNodeId(doc.getRoot().getUID());  // You forgot this
+        return response;
     }
 
     @Override
@@ -180,19 +214,19 @@ public class DocumentService implements IDocumentService {
         return docRepo.findById(documentId)
             .map(doc -> {
                 String textContent = buildDocumentText(doc); // flatten CRDT nodes to string
-                List<String> collaborators = doc.getClients().stream()
-                                                .map(ClientModel::getUsername)
-                                                .toList();
+                List<CollaboratorDTO> collaborators = doc.getClients().stream()
+                .map(c -> new CollaboratorDTO(c.getUsername(), c.getMode()))
+                .toList();
 
-                return new DocumentResponseDTO(
-                doc.getUID(),
-                textContent,
-                doc.getEditCode(),
-                doc.getViewCode(),
-                doc.getClients().stream()
-                    .map(c -> Pair.of(c.getUsername(), c.getMode()))
-                    .toList()
-                );
+
+                DocumentResponseDTO response = new DocumentResponseDTO();
+                response.setDocumentId(doc.getUID());
+                response.setEditCode(doc.getEditCode());
+                response.setViewCode(doc.getViewCode());
+                response.setCollaborators(collaborators);
+                response.setTextContent(textContent);
+                response.setRootNodeId(doc.getRoot().getUID());  // You forgot this
+                return response;
             })
             .orElseThrow(() -> new RuntimeException("Document not found."));
     }

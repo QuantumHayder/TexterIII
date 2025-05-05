@@ -3,6 +3,7 @@ package cmps211.example.texteditor.service.Implementations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cmps211.example.texteditor.DTO.ClientResponseDTO;
 import cmps211.example.texteditor.models.ClientModel;
 import cmps211.example.texteditor.models.ClientModel.UserMode;
 import cmps211.example.texteditor.repository.ClientRepository;
@@ -13,13 +14,16 @@ public class ClientService implements IClientService{
     private ClientRepository clientRepo;
 
     @Override
-    public int createClient(String username, UserMode usermode) {
+    public ClientResponseDTO createClient(String username, UserMode usermode) {
         ClientModel client = new ClientModel();
         client.setUsername(username);
         client.setMode(usermode);
         //client.setCode(code);
         //client.setMode(ClientModel.UserMode.valueOf(mode.toUpperCase()));
-        return clientRepo.save(client).getUID(); // return the generated client ID
+        clientRepo.save(client);
+        System.out.println("Saved client with UID = " + client.getUID()); // ✅
+
+        return new ClientResponseDTO(client.getUsername(), client.getMode(), client.getUID()); // return the generated client ID
     }
     
     

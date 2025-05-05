@@ -10,10 +10,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import cmps211.example.texteditor.models.DocumentModel;
 @Data
@@ -38,6 +41,8 @@ public class Node {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Node> children = new ArrayList<>();
 
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id")
     private DocumentModel document;
