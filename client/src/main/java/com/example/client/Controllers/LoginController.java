@@ -9,6 +9,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class LoginController {
     @FXML
     private TextField usernameField;
@@ -37,12 +40,10 @@ public class LoginController {
         }
     }
 
-    
     private int sendCreateClientRequest(String username, String usermode) throws IOException, InterruptedException {
         var client = java.net.http.HttpClient.newHttpClient();
     
-        // Ensure the usermode is sent in uppercase to match the enum values
-        String requestBody = String.format("{\"username\":\"%s\", \"usermode\":\"%s\"}", 
+        String requestBody = String.format("{\"username\":\"%s\", \"usermode\":\"%s\"}",
                                            username, usermode.toUpperCase());
     
         var request = java.net.http.HttpRequest.newBuilder()
@@ -53,13 +54,17 @@ public class LoginController {
     
         var response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
     
-        // Optional: log or check for errors
         if (response.statusCode() != 200) {
             throw new IOException("Failed to create client: " + response.body());
         }
     
-        return Integer.parseInt(response.body());
+        // Parse JSON and extract userUID
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode json = mapper.readTree(response.body());
+    
+        return json.get("userUID").asInt();
     }
+    
     
     
     private void navigateToDocumentSelection(String username, String usermode, int userId) throws IOException {

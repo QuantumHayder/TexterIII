@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import cmps211.example.texteditor.DTO.ClientRequest;
+import cmps211.example.texteditor.DTO.ClientResponseDTO;
 import cmps211.example.texteditor.DTO.DocumentRequestDTO;
 import cmps211.example.texteditor.DTO.DocumentResponseDTO;
 import cmps211.example.texteditor.service.Implementations.ClientService;
@@ -24,16 +25,18 @@ public class TexterRestController {
 
     
     @PostMapping("/client")
-    public int createClient(@RequestBody ClientRequest request) {
+    public ClientResponseDTO createClient(@RequestBody ClientRequest request) {
         return clientService.createClient(request.getUsername(), request.getUsermode());
     }
     @PostMapping("/create")
     public ResponseEntity<DocumentResponseDTO> createDocument(@RequestBody DocumentRequestDTO request) {
+        System.out.println("Received clientUID: " + request.getClientUID()); // debug
         try {
             DocumentResponseDTO response = documentService.createDocument(request.getClientUID());
             return ResponseEntity.ok(response); 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            System.err.println("Error in createDocument: " + e.getMessage()); // Log the error
+            return ResponseEntity.badRequest().body(new DocumentResponseDTO(null, null, null, null, null,null)); // Return empty response with 400
         }
     }
     @PostMapping("/register/{documentId}")
@@ -45,7 +48,8 @@ public class TexterRestController {
         DocumentResponseDTO response = documentService.registerToDocument(documentId, request.getClientUID());
         return ResponseEntity.ok(response);
     } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().build(); // Optionally return error message
+        System.err.println("Error in registerToDocument: " + e.getMessage()); // Log the error
+        return ResponseEntity.badRequest().body(new DocumentResponseDTO(null, null, null, null, null,null)); // Return empty response with 400
     }
 }
     /*@PostMapping("/upload")

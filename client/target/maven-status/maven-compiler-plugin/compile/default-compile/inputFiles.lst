@@ -3,7 +3,12 @@ C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\m
 C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\main\java\com\example\client\Controllers\DocumentSessionController.java
 C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\main\java\com\example\client\Controllers\LoginController.java
 C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\main\java\com\example\client\Controllers\SecondaryController.java
+C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\main\java\com\example\client\DTO\CollaboratorDTO.java
+C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\main\java\com\example\client\DTO\DocumentRequestDTO.java
+C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\main\java\com\example\client\DTO\DocumentResponseDTO.java
+C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\main\java\com\example\client\DTO\DocumentSessionDTO.java
 C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\main\java\com\example\client\Models\ClientModel.java
 C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\main\java\com\example\client\Models\DocumentModel.java
 C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\main\java\com\example\client\Models\Node.java
+C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\main\java\com\example\client\Services\DocumentService.java
 C:\Users\Abd El-Rahman Hayder\VsCode Projects\APTProject\TextEditor\client\src\main\java\com\example\client\Utils\Exceptions\GlobalExceptionHandler.java

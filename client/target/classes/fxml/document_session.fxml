@@ -9,9 +9,13 @@
            orientation="HORIZONTAL"
            prefWidth="800" prefHeight="500">
 
-    <!-- Left Pane -->
     <items>
-        <VBox spacing="15" prefWidth="250" padding="10">
+        <!-- Left Pane -->
+        <VBox spacing="15" prefWidth="250">
+            <padding>
+                <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+            </padding>
+
             <VBox spacing="5">
                 <Label text="Editor Code:" />
                 <TextField fx:id="editorCodeField" editable="false" />
