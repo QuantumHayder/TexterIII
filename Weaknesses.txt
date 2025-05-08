@@ -1,0 +1,44 @@
+1. Database Design & Persistence Overhead
+Nodes are stored individually per character, leading to huge row counts for long documents. This results in:
+
+Slow read/write queries
+
+Excessive memory usage for ORM session management
+
+Root node and client-document relationships rely on JPA with potential cascading or lazy loading pitfalls, which can break under concurrent or large operations.
+
+2. CRDT Algorithm in Memory (No Snapshotting)
+The current CRDTAlgorithm keeps the tree in memory during session operations.
+
+This means reconstruction on restart or failure is slow.
+
+No mechanism exists to persist partial CRDT state or snapshots to speed up recovery.
+
+3. WebSocket Scalability
+All collaborative editing relies on WebSocket broadcast from the backend.
+
+No use of a message broker (like Redis Pub/Sub or RabbitMQ) to distribute load.
+
+As concurrent users grow, a single instance becomes a bottleneck.
+
+4. Hardcoded and Local Paths
+File export initially used C:\Users\... paths, making it platform-dependent and insecure.
+
+There's no cloud storage integration (e.g., AWS S3) or streaming approach for production file handling.
+
+5. Lack of Rate Limiting or Throttling
+No protection against:
+
+Malicious or buggy clients sending large volumes of characters
+
+DoS attacks or accidental overuse
+
+Backend will attempt to persist every character insertion, making it vulnerable to write amplification.
+
+6. Lack of Load-Balancing or Sharding
+All document editing is tied to a single backend service and H2 database:
+
+No support for horizontal scaling
+
+No document partitioning or client affinity routing
+

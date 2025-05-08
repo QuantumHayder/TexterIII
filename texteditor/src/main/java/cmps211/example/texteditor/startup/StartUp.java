@@ -1,4 +1,4 @@
-package cmps211.example.texteditor.startup;
+/*package cmps211.example.texteditor.startup;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -42,4 +42,4 @@ public class StartUp {
 
         System.out.println("Doc Text: " + algo.getDocumentText(doc.getRoot()));
     }
-}
+}*/

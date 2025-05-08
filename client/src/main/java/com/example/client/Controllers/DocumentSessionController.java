@@ -15,7 +15,10 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import com.example.client.DTO.CollaboratorDTO;
+import com.example.client.DTO.NodeDTO;
 import com.example.client.Models.ClientModel.UserMode;
+import com.example.client.Models.CrdtBuffer;
+import com.example.client.Services.CharacterService;
 import com.example.client.Services.DocumentService;
 import com.example.client.Utils.Helper;
 
@@ -24,6 +27,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 
 public class DocumentSessionController {
     @FXML private TextArea editorTextArea;
@@ -31,37 +35,41 @@ public class DocumentSessionController {
     @FXML private TextField viewerCodeField;
     @FXML private ListView<CollaboratorDTO> collaboratorsList;
 
-    private final DocumentService documentService = new DocumentService();
+    //private final DocumentService documentService = new DocumentService();
     private final Helper helper = new Helper();
 
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
 
+    private CharacterService characterService;
+    private CrdtBuffer crdtBuffer = new CrdtBuffer();
+    private String rootNodeId;
     private UUID documentId;
-    private String viewCode;
+    private int userId; 
+    /*private String viewCode;
     private String editCode;
     private List<CollaboratorDTO> collaborators;
     private int ownerId;
     private String rootNodeId;
-    private String docText;
+    private String docText;*/
 
-    public void initializeData(UUID documentId, String viewCode, String editCode, List<CollaboratorDTO> collaborators,
+    public void initializeData(UUID documentId, String viewCode, String editCode, List<CollaboratorDTO> collaborators,int userId,
                                int ownerId, String rootNodeId, String docText) {
-        this.documentId = documentId;
-        this.viewCode = viewCode;
-        this.editCode = editCode;
-        this.collaborators = collaborators;
-        this.ownerId = ownerId;
+        this.documentId = documentId;        
         this.rootNodeId = rootNodeId;
-        this.docText = docText;
+        this.userId = userId;
+       
+
+        crdtBuffer.addRoot(new NodeDTO(rootNodeId, '\0'));
+        connectToWebSocketAndSubscribe();
+        subscribeToCharacterUpdates();
+        setupKeyListener();
 
         editorCodeField.setText(editCode);
         viewerCodeField.setText(viewCode);
         editorTextArea.setText(docText);
 
         collaboratorsList.getItems().addAll(collaborators);
-
-        connectToWebSocketAndSubscribe();
         /* 
         if (usermode.toString().equalsIgnoreCase("VIEWER")) {
             editorTextArea.setEditable(false);
@@ -89,6 +97,8 @@ public class DocumentSessionController {
         try {
             System.out.println("Attempting WebSocket connection...");
             stompSession = stompClient.connect("ws://localhost:8080/texter", new MyStompSessionHandler()).get();
+            characterService = new CharacterService(stompSession); // shared instance
+
             System.out.println("WebSocket connection successful.");
 
             // Subscribe to collaborator updates
@@ -103,7 +113,7 @@ public class DocumentSessionController {
                 public void handleFrame(StompHeaders headers, Object payload) {
                     CollaboratorDTO[] collaborators = (CollaboratorDTO[]) payload;
                     updateCollaborators(List.of(collaborators));
-                    System.out.println("📥 Received collaborators update: " + List.of(collaborators));
+                    System.out.println(" Received collaborators update: " + List.of(collaborators));
                 }
             });
 
@@ -114,10 +124,52 @@ public class DocumentSessionController {
         }
     }
 
+    private void subscribeToCharacterUpdates() {
+    // assumes characterService already initialized in connectToWebSocketAndSubscribe()
+    characterService.subscribeToCharacterUpdates(
+        documentId.toString(),
+        (parentId, children) -> {
+            System.out.println("🔄 [CLIENT] got children for " + parentId);
+            crdtBuffer.insertChildren(parentId, children);
+            Platform.runLater(() -> {
+                String full = crdtBuffer.toString();
+                int oldPos = editorTextArea.getCaretPosition();
+                editorTextArea.setText(full);
+                // restore or clamp caret
+                int pos = Math.min(oldPos, full.length());
+                editorTextArea.positionCaret(pos);
+              });
+        }
+        );
+    }
+
+    private void setupKeyListener() {
+        editorTextArea.addEventFilter(KeyEvent.KEY_TYPED, evt -> {
+        String text = evt.getCharacter();
+        if (text.isEmpty() || "\r\n".contains(text)) return;
+        char c = text.charAt(0);
+        System.out.println("⤴ [UI] KeyTyped: '" + c + "'");
+
+        // 1. Figure out where the caret is _before_ insertion
+        int insertPos = editorTextArea.getCaretPosition();
+        String parentId;
+        if (insertPos <= 0) {
+            parentId = rootNodeId;
+        } else {
+            // fetch the node just before the caret in your CRDT buffer
+            parentId = crdtBuffer.getOrderedNodes()
+                                .get(insertPos - 1)
+                                .getNodeId();
+        }
+
+        characterService.typeCharacter(documentId, userId, c, parentId);
+        });
+    }
+
     class MyStompSessionHandler extends StompSessionHandlerAdapter {
         @Override
         public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-            System.out.println("✅ Connected to WebSocket STOMP broker.");
+            System.out.println(" Connected to WebSocket STOMP broker.");
         }
     }
 }

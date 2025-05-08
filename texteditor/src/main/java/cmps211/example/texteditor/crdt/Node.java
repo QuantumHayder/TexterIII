@@ -26,7 +26,6 @@ import cmps211.example.texteditor.models.DocumentModel;
 @NoArgsConstructor
 public class Node {
     @Id
-    //TODO: Consider how will the id be generated
     private String UID; // userId (1,2,3, etc) + timestamp)
     private int userId;
     private Instant clock; //time of creation
