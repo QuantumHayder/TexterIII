@@ -1,0 +1,10 @@
+Running Server (texteditor folder):
+
+-open the whole project in VsCode
+-click on run button (triangle shaped)
+-choose the texteditor folder to run
+
+Running Client (client folder):
+-open a new gitbash terminal
+-navigate to the client folder -> cd client
+-Run this command: mvn clean javafx:run

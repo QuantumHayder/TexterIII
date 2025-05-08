@@ -1,56 +1,45 @@
 package cmps211.example.texteditor.controllers;
 
+import cmps211.example.texteditor.DTO.CharacterResponseDTO;
+import cmps211.example.texteditor.DTO.CharacterTypePayload;
+import cmps211.example.texteditor.service.Implementations.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 
-import cmps211.example.texteditor.DTO.ClientResponseDTO;
-import cmps211.example.texteditor.models.Message;
-import cmps211.example.texteditor.service.Implementations.DocumentService;
+import java.util.UUID;
 
 @Controller
 public class TexterWebSocketController {
     @Autowired
-    private DocumentService DocumentService;
+    private DocumentService documentService;
 
-    @MessageMapping("/type")
-    @SendTo("/topic/document")
-    public Message typeCharacter(@Payload String[] payload) {
-        int userId = Integer.parseInt(payload[0]);
-        String documentId = payload[1];
-        char character =payload[2].charAt(0);
-        String parentId = payload[3];
+    @MessageMapping("/character/type/{docId}")
+    public void typeCharacter(@Payload CharacterTypePayload payload, @org.springframework.messaging.handler.annotation.DestinationVariable UUID docId) {
+        System.out.println("🔵 WebSocket message received:");
+        System.out.println("  ↳ UserID: " + payload.getUserId());
+        System.out.println("  ↳ Char: " + payload.getCharacter());
+        System.out.println("  ↳ ParentID: " + payload.getParentNodeId());
+        System.out.println("  ↳ DocID: " + docId);
 
-        String resultMessage = DocumentService.typeCharacter(userId,documentId,character,parentId);
-        boolean isError = resultMessage.startsWith("Invalid");
-        //1 = Node not created, 0 = Node created
-        return new Message(character,isError);
+        CharacterResponseDTO response = documentService.handleTypedCharacter(
+            payload.getUserId(),
+            docId,
+            payload.getCharacter(),
+            payload.getParentNodeId()
+        );
+
+        System.out.println("✅ Node created. Sending to topic /topic/document/" + docId + "/children");
+        documentService.getMessagingTemplate().convertAndSend(
+            "/topic/document/" + docId + "/children",
+            response
+        );
     }
 
-    @MessageMapping("/delete")
-    @SendTo("/topic/document")
-    public Message removeCharacter(@Payload String[] payload) {
-        char character = payload[0].charAt(0);
-        String nodeId = payload[1];
-        String resultMessage = DocumentService.deleteCharacter(nodeId);
-        boolean isError = resultMessage.startsWith("Invalid");
-        //1 = Node not created, 0 = Node created
-        return new Message(character,isError);
+    @MessageMapping("/character/delete/{docId}")
+    public void deleteCharacter(@Payload String nodeId, @org.springframework.messaging.handler.annotation.DestinationVariable String docId) {
+        documentService.deleteCharacter(nodeId); // Optionally: broadcast deletion as well
     }
-
-    /* 
-    @MessageMapping("/undo")
-    @SendTo("topic/document")
-    public Message undo() {
-        return Message();
-    }
-
-    @MessageMapping("/redo")
-    @SendTo("topic/document")
-    public Message redo() {
-        return Message();
-    }
-    */
 }

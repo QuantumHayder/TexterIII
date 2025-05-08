@@ -20,8 +20,8 @@ import java.util.UUID;
 
 public class DocumentSelectionController {
     private int userId;
-    private String username;
-    private String usermode;
+    //private String username;
+    //private String usermode;
     private final Helper helper = new Helper();
 
 
@@ -32,8 +32,8 @@ public class DocumentSelectionController {
 
     public void initializeData(int userId, String username, String usermode) {
         this.userId = userId;
-        this.username = username;
-        this.usermode = usermode;
+       // this.username = username;
+        //this.usermode = usermode;
     }
 
     @FXML
@@ -47,7 +47,7 @@ public class DocumentSelectionController {
             System.out.println("  rootNodeId: " + session.getRootNodeId());
 
             navigateToJoinedDocument(session.getDocumentId(), session.getViewCode(), session.getEditCode(),
-                    session.getCollaborators(), userId, session.getRootNodeId(), session.getTextContent());
+                    session.getCollaborators(), session.getOwnerId(), userId,session.getRootNodeId(), session.getTextContent());
         } catch (Exception e) {
             System.err.println("Exception occurred in handleCreateNewDocument()");
             e.printStackTrace();  
@@ -67,19 +67,19 @@ public class DocumentSelectionController {
         try {
             DocumentResponseDTO session = documentService.registerToDocument(docCode, userId);
             navigateToJoinedDocument(session.getDocumentId(), session.getViewCode(), session.getEditCode(),
-                    session.getCollaborators(), session.getOwnerId(), session.getRootNodeId(), session.getTextContent());
+                    session.getCollaborators(), session.getOwnerId(), this.userId, session.getRootNodeId(), session.getTextContent());
         } catch (Exception e) {
             helper.showAlert("Error", "Join Failed", e.getMessage());
         }
     }
 
     private void navigateToJoinedDocument(UUID documentId, String editorCode, String viewerCode,
-                                          List<CollaboratorDTO> collaborators, int ownerId, String rootNodeId, String content) throws IOException {
+                                          List<CollaboratorDTO> collaborators, int ownerId,int userId ,String rootNodeId, String content) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/document_session.fxml"));
         Scene scene = new Scene(loader.load());
 
         DocumentSessionController controller = loader.getController();
-        controller.initializeData(documentId,viewerCode, editorCode, collaborators, ownerId, rootNodeId, content);
+        controller.initializeData(documentId,viewerCode, editorCode, collaborators, userId, ownerId ,rootNodeId, content);
         controller.setInitialText(content);
 
         Stage stage = (Stage) joinCodeField.getScene().getWindow();

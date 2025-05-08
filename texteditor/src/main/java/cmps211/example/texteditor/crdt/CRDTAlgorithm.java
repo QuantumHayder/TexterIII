@@ -29,11 +29,22 @@ public class CRDTAlgorithm {
     private void sortChildren(Node parent) {
         List<Node> children = parent.getChildren();
 
-        // Sort first by timestamp descending, then by user ID ascending if timestamps are equal
-        children.sort(Comparator.comparing(Node::getClock, Comparator.reverseOrder())
-                                .thenComparing(Node::getUID));
+        if (parent.getParent() == null) {
+            // ROOT: oldest first so top-level a→b→c
+            children.sort(
+                Comparator.comparing(Node::getClock)
+                          .thenComparing(Node::getUID)
+            );
+        } else {
+            // non-root: newest first so children under “a” become [c,b]
+            children.sort(
+                Comparator.comparing(Node::getClock, Comparator.reverseOrder())
+                          .thenComparing(Node::getUID)
+            );
+        }
     }
 
+    // … rest of your undo/redo/merge/getDocumentText etc. unchanged …
     public void deleteNode(Node node) {
         node.markDeleted();
         undoStack.add(node);

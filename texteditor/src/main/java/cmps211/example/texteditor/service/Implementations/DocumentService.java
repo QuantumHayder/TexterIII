@@ -9,12 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import cmps211.example.texteditor.DTO.CharacterResponseDTO;
 import cmps211.example.texteditor.DTO.CollaboratorDTO;
 import cmps211.example.texteditor.DTO.DocumentResponseDTO;
+import cmps211.example.texteditor.DTO.NodeDTO;
 import cmps211.example.texteditor.crdt.CRDTAlgorithm;
 import cmps211.example.texteditor.crdt.Node;
 import cmps211.example.texteditor.models.ClientModel;
@@ -24,8 +27,6 @@ import cmps211.example.texteditor.repository.ClientRepository;
 import cmps211.example.texteditor.repository.DocumentRepository;
 import cmps211.example.texteditor.repository.NodeRepository;
 import cmps211.example.texteditor.service.Interfaces.IDocumentService;
-import jakarta.annotation.PostConstruct;
-
 
 @Service
 public class DocumentService implements IDocumentService {
@@ -179,6 +180,49 @@ public class DocumentService implements IDocumentService {
         return newNode.getCharacter() + " added";
     }
 
+    @Transactional
+    public CharacterResponseDTO handleTypedCharacter(int userId, UUID docId, char character, String parentNodeId) {
+        System.out.println("🟡 handleTypedCharacter called with:");
+        System.out.println("  ↳ userId = " + userId);
+        System.out.println("  ↳ docId = " + docId);
+        System.out.println("  ↳ parentNodeId = " + parentNodeId);
+        System.out.println("  ↳ character = " + character);
+
+        Optional<Node> parentOpt = nodeRepo.findById(parentNodeId);
+        Optional<DocumentModel> docOpt = docRepo.findById(docId);
+        Optional<ClientModel> clientOpt = clientRepo.findById(userId);
+
+        if (parentOpt.isEmpty() || docOpt.isEmpty() || clientOpt.isEmpty()) {
+            throw new IllegalArgumentException("Invalid input.");
+        }
+
+        Node parent = parentOpt.get();
+        DocumentModel doc = docOpt.get();
+        ClientModel client = clientOpt.get();
+
+        Node newNode = new Node(userId, character, parent);
+        crdtAlgo.insertNode(parent, newNode);
+
+        nodeRepo.save(newNode);
+        nodeRepo.save(parent); // update children list if needed
+        doc.addNode(newNode);
+        docRepo.save(doc);
+
+        System.out.println("✅ Node saved to DB: " + newNode.getUID());
+
+        // Get and sort children under this parent
+        List<Node> children = parent.getChildren();
+        System.out.println("📦 Parent now has " + children.size() + " child(ren)");
+
+        // Build response
+        List<NodeDTO> childrenDTO = children.stream()
+            .map(n -> new NodeDTO(n.getUID(), n.getCharacter()))
+            .toList();
+
+        return new CharacterResponseDTO(parentNodeId, childrenDTO);
+}
+
+
     @Override
     public String deleteCharacter (String nodeId) {
         Optional<Node> nodeOpt = nodeRepo.findById(nodeId);
@@ -234,6 +278,10 @@ public class DocumentService implements IDocumentService {
 
     private String buildDocumentText(DocumentModel doc) {
         return crdtAlgo.getDocumentText(doc.getRoot());
+    }
+
+    public SimpMessagingTemplate getMessagingTemplate() {
+        return messagingTemplate;
     }
 
     /////////////////Test/////////////////////

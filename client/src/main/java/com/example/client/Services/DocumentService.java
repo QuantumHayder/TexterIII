@@ -26,15 +26,15 @@ public class DocumentService {
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-        System.out.println("Response status: " + response.statusCode());             // ✅ DEBUG
-        System.out.println("Response body: " + response.body());                     // ✅ DEBUG
+        System.out.println("Response status: " + response.statusCode());             
+        System.out.println("Response body: " + response.body());                     
     
         if (response.statusCode() != 200) {
             throw new IllegalStateException("Failed to register: " + response.body());
         }
 
         DocumentResponseDTO dto = objectMapper.readValue(response.body(), DocumentResponseDTO.class);
-        System.out.println("Deserialized DTO: " + dto);                              // ✅ DEBUG
+        System.out.println("Deserialized DTO: " + dto);                             
         return dto;
     }
 
